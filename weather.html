@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🌦️ Weather Dashboard</h1>
+            <div class="search-box">
+                <input type="text" id="city-input" placeholder="Enter city name..." autocomplete="off">
+                <button id="search-btn">Search</button>
+            </div>
+        </header>
+
+        <main class="dashboard-grid">
+            <!-- Current Weather Card -->
+            <section class="card current-weather" id="current-weather-card">
+                <div class="card-header">
+                    <h2 id="city-name">City Name</h2>
+                    <span id="current-date">Date</span>
+                </div>
+                <div class="weather-info">
+                    <div class="temp-display">
+                        <span id="temperature">--</span><span class="unit">°C</span>
+                    </div>
+                    <div class="condition-display">
+                        <img id="weather-icon" src="" alt="Weather Icon" style="display: none;">
+                        <p id="weather-description">Search for a city to begin</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Weather Details Metrics Grid -->
+            <section class="metrics-grid">
+                <div class="card metric-card">
+                    <h3>Humidity</h3>
+                    <p class="metric-value" id="humidity-val">--%</p>
+                </div>
+                <div class="card metric-card">
+                    <h3>Wind Speed</h3>
+                    <p class="metric-value" id="wind-val">-- m/s</p>
+                </div>
+                <div class="card metric-card">
+                    <h3>Feels Like</h3>
+                    <p class="metric-value" id="feels-like-val">--°C</p>
+                </div>
+                <div class="card metric-card">
+                    <h3>Pressure</h3>
+                    <p class="metric-value" id="pressure-val">-- hPa</p>
+                </div>
+            </section>
+
+            <!-- Search History Sidebar -->
+            <section class="card history-sidebar">
+                <h3>Recent Searches</h3>
+                <div id="history-list" class="history-list">
+                    <p class="no-history">No recent searches</p>
+                </div>
+                <button id="clear-history-btn" class="clear-btn">Clear History</button>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
