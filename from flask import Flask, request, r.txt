@@ -1,0 +1,173 @@
+from flask import Flask, request, render_template_string
+import requests
+import sqlite3
+
+app = Flask(__name__)
+
+# Replace with your OpenWeatherMap API Key
+API_KEY = "YOUR_API_KEY"
+
+# Create Database
+conn = sqlite3.connect("weather.db", check_same_thread=False)
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS weather (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    city TEXT,
+    temperature REAL,
+    humidity INTEGER,
+    description TEXT
+)
+""")
+conn.commit()
+
+HTML = """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Forecast System</title>
+    <style>
+        body{
+            font-family:Arial;
+            background:#eaf4ff;
+            text-align:center;
+            margin:40px;
+        }
+        .box{
+            width:420px;
+            margin:auto;
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px gray;
+        }
+        input{
+            width:90%;
+            padding:10px;
+            margin:10px;
+        }
+        button{
+            padding:10px 20px;
+            background:blue;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+        table{
+            width:100%;
+            margin-top:20px;
+            border-collapse:collapse;
+        }
+        table,th,td{
+            border:1px solid black;
+            padding:8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Weather Forecast System</h2>
+
+<form method="POST">
+<input type="text" name="city" placeholder="Enter City Name" required>
+<br>
+<button type="submit">Get Weather</button>
+</form>
+
+{% if weather %}
+
+<h3>{{weather.city}}</h3>
+
+<p><b>Temperature:</b> {{weather.temp}} °C</p>
+
+<p><b>Humidity:</b> {{weather.humidity}} %</p>
+
+<p><b>Description:</b> {{weather.desc}}</p>
+
+{% endif %}
+
+<h3>Search History</h3>
+
+<table>
+
+<tr>
+<th>ID</th>
+<th>City</th>
+<th>Temp</th>
+<th>Humidity</th>
+<th>Description</th>
+</tr>
+
+{% for row in history %}
+
+<tr>
+
+<td>{{row[0]}}</td>
+
+<td>{{row[1]}}</td>
+
+<td>{{row[2]}}</td>
+
+<td>{{row[3]}}</td>
+
+<td>{{row[4]}}</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>
+"""
+
+@app.route("/", methods=["GET", "POST"])
+def home():
+
+    weather = None
+
+    if request.method == "POST":
+
+        city = request.form["city"]
+
+        url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+
+        response = requests.get(url).json()
+
+        if response.get("cod") == 200:
+
+            temp = response["main"]["temp"]
+            humidity = response["main"]["humidity"]
+            desc = response["weather"][0]["description"]
+
+            cursor.execute(
+                "INSERT INTO weather(city,temperature,humidity,description) VALUES(?,?,?,?)",
+                (city, temp, humidity, desc)
+            )
+            conn.commit()
+
+            weather = {
+                "city": city,
+                "temp": temp,
+                "humidity": humidity,
+                "desc": desc
+            }
+
+    cursor.execute("SELECT * FROM weather ORDER BY id DESC")
+    history = cursor.fetchall()
+
+    return render_template_string(
+        HTML,
+        weather=weather,
+        history=history
+    )
+
+if __name__ == "__main__":
+    app.run(debug=True)
